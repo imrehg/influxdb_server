@@ -1,0 +1,64 @@
+version: '3'
+services:
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    env_file:
+      - 'env.influxdb'
+    volumes:
+      - ./data/influxdb:/var/lib/influxdb
+    ports:
+      - "8086:8086"
+    restart: on-failure
+
+  chronograf:
+    image: chronograf
+    container_name: chronograf
+    volumes:
+      - ./data/chronograf:/var/lib/chronograf
+    ports:
+      - "8888:8888"
+    links:
+      - influxdb
+    env_file:
+      - "env.chronograf"
+    restart: on-failure
+
+  kapacitor:
+    image: kapacitor
+    container_name: kapactior
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+    volumes:
+      - ./data/kapacitor:/var/lib/kapacitor
+    links:
+      - influxdb
+    ports:
+      - "9092:9092"
+    restart: on-failure
+
+  # The device's own monitoring
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    hostname: current_server
+    links:
+      - influxdb
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    restart: on-failure
+
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana
+#    ports:
+#      - "3000:3000"
+#    env_file:
+#      - 'env.grafana'
+#    links:
+#      - influxdb
+#    volumes:
+#      - ./data/grafana:/var/lib/grafana
+#    restart: on-failure
+#    user: "0"
