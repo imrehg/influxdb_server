@@ -1,7 +1,8 @@
-version: '3'
+version: '3.7'
 services:
+  # Data store
   influxdb:
-    image: influxdb:1.7.3
+    image: influxdb:1.7.5-alpine
     container_name: influxdb
     env_file:
       - 'env.influxdb'
@@ -11,8 +12,9 @@ services:
       - "8086:8086"
     restart: on-failure
 
+  # UI
   chronograf:
-    image: chronograf:1.7.3
+    image: chronograf:1.7.8-alpine
     container_name: chronograf
     volumes:
       - ./data/chronograf:/var/lib/chronograf
@@ -24,8 +26,9 @@ services:
       - "env.chronograf"
     restart: on-failure
 
+  # Alerting
   kapacitor:
-    image: kapacitor:1.5.2
+    image: kapacitor:1.5.2-alpine
     container_name: kapactior
     environment:
       KAPACITOR_HOSTNAME: kapacitor
@@ -40,7 +43,7 @@ services:
 
   # The device's own monitoring
   telegraf:
-    image: telegraf:1.5.2
+    image: telegraf:1.10.1-alpine
     container_name: telegraf
     hostname: current_server
     links:
